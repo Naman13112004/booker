@@ -15,10 +15,10 @@ const Profile = () => {
   useEffect(() => {
     const fetchData = async () => {
       const resBooks = await api.get("/books/mine");
-      setMyBooks(resBooks.data);
+      setMyBooks(resBooks.data.books);
 
       const resReviews = await api.get("/reviews/mine");
-      setMyReviews(resReviews.data);
+      setMyReviews(resReviews.data.reviews);
     };
     fetchData();
   }, []);

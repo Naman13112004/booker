@@ -48,9 +48,21 @@ export const getMyBooks = asyncHandler(async (req, res) => {
 
   const books = await Book.find({ addedBy: userId }).sort({ createdAt: -1 });
 
+  const booksWithRatings = await Promise.all(
+    books.map(async (book) => {
+      if (book.reviewsCount === undefined || book.averageRating === undefined) {
+        await recomputeBookRating(book._id);
+        const updatedBook = await Book.findById(book._id).select("averageRating reviewsCount");
+        book.averageRating = updatedBook.averageRating;
+        book.reviewsCount = updatedBook.reviewsCount;
+      }
+      return book;
+    })
+  );
+
   res.json({
     success: true,
-    books,
+    booksWithRatings,
   });
 });
 
@@ -71,6 +83,8 @@ export const createBook = async (req, res, next) => {
       year,
       addedBy: req.user._id,
     });
+
+    await recomputeBookRating(book._id);
 
     res.status(201).json({ success: true, data: book });
   } catch (err) {
@@ -105,9 +119,9 @@ export const getBooks = async (req, res, next) => {
     }
 
     // Sorting
-    let sort = { createdAt: -1 }; // default newest
-    if (req.query.sort === "year") sort = { year: -1 };
-    if (req.query.sort === "rating") sort = { averageRating: -1 };
+    let sort = { createdAt: -1, _id: -1 }; // default newest
+    if (req.query.sort === "year") sort = { year: -1, _id: -1 };
+    if (req.query.sort === "rating") sort = { averageRating: -1, _id: -1 };
 
     const [books, total] = await Promise.all([
       Book.find(filters)
@@ -119,6 +133,19 @@ export const getBooks = async (req, res, next) => {
       Book.countDocuments(filters),
     ]);
 
+    // Populate averageRating & reviewsCount if missing
+    const booksWithRatings = await Promise.all(
+      books.map(async (book) => {
+        if (book.reviewsCount === undefined || book.averageRating === undefined) {
+          await recomputeBookRating(book._id);
+          const updatedBook = await Book.findById(book._id).select("averageRating reviewsCount");
+          book.averageRating = updatedBook.averageRating;
+          book.reviewsCount = updatedBook.reviewsCount;
+        }
+        return book;
+      })
+    );
+
     res.json({
       success: true,
       meta: {
@@ -127,7 +154,7 @@ export const getBooks = async (req, res, next) => {
         total,
         totalPages: Math.ceil(total / limit),
       },
-      data: books,
+      data: booksWithRatings,
     });
   } catch (err) {
     next(err);
@@ -198,6 +225,9 @@ export const updateBook = async (req, res, next) => {
     });
 
     await book.save();
+
+    await recomputeBookRating(book._id);
+
     res.json({ success: true, data: book });
   } catch (err) {
     next(err);

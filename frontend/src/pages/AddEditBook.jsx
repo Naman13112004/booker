@@ -15,21 +15,39 @@ const AddEditBook = () => {
     author: "",
     description: "",
     genre: "",
-    year: "",
+    year: 1900,
   });
 
   useEffect(() => {
     if (id) {
       const fetchBook = async () => {
-        const res = await api.get(`/books/${id}`);
-        setForm(res.data);
+        try {
+          const res = await api.get(`/books/${id}`);
+          // Make sure we extract the book data correctly
+          const bookData = res.data?.data?.book || res.data; 
+          setForm({
+            title: bookData.title || "",
+            author: bookData.author || "",
+            description: bookData.description || "",
+            genre: bookData.genre || "",
+            year: bookData.year || 1900,
+          });
+        } catch (err) {
+          console.error("Failed to fetch book:", err);
+        }
       };
       fetchBook();
     }
   }, [id]);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm({
+      ...form,
+      [name]: name === "year" ? Number(value) : value,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

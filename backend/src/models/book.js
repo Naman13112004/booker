@@ -27,6 +27,14 @@ const bookSchema = new mongoose.Schema(
       type: Number,
       required: [true, "Published year is required"],
     },
+    averageRating: { 
+      type: Number, 
+      default: 0 
+    },
+    reviewsCount: { 
+      type: Number, 
+      default: 0 
+    },
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // reference to User model

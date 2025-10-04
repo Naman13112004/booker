@@ -3,23 +3,43 @@
 // Shows paginated list of books
 // ----------------------------------------------------
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import api from "../api/axiosClient";
 import BookCard from "../components/BookCard";
 import Pagination from "../components/Pagination";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 const BookList = () => {
+  const { user } = useContext(AuthContext);
+
   const [books, setBooks] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
 
+  const handleDeleteBook = async (id) => {
+    if (!user) return;
+    if (!window.confirm("Are you sure you want to delete this book?")) return;
+
+    try {
+      await api.delete(`/books/${id}`);
+      setBooks((prev) => prev.filter((b) => b._id !== id)); 
+      navigate("/books");
+    } catch (err) {
+      console.error("Failed to delete book:", err);
+    }
+  };
+
   useEffect(() => {
     const fetchBooks = async () => {
-      const res = await api.get(`/books?page=${page}`);
-      setBooks(res.data?.books || []);
-      setTotalPages(res.data?.totalPages || 1);
+      const res = await api.get(`/books?page=${page}`, {
+        headers: {
+          "Cache-Control": "no-cache",
+        }
+      });
+      setBooks(res.data?.data || []);
+      setTotalPages(res.data?.meta.totalPages || 1);
     };
     fetchBooks();
   }, [page]);
@@ -34,6 +54,9 @@ const BookList = () => {
               key={book._id}
               book={book}
               onSelect={(id) => navigate(`/books/${id}`)}
+              onEdit={(id) => navigate(`/books/edit/${id}`)}
+              onDelete={handleDeleteBook}
+              user={user}
             />
           ))  
         ) : (

@@ -40,6 +40,12 @@ const Header = () => {
         {user ? (
           <>
             <span className="font-semibold">Hello, {user.name}</span>
+            <Link
+              to="/books/add"
+              className="ml-3 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              + Add Book
+            </Link>
             <button
               onClick={logout}
               className="ml-3 bg-red-500 px-3 py-1 rounded hover:bg-red-600"
