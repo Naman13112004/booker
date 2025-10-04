@@ -40,6 +40,12 @@ app.get("/", (req, res) => {
 // In future: app.use("/api/reviews", reviewRoutes);
 
 // ---------------------------
+// Error Handler (last middleware)
+// ---------------------------
+// This should always be after all routes
+app.use(errorHandler);
+
+// ---------------------------
 // Export app to use in index.js
 // ---------------------------
 export default app;
