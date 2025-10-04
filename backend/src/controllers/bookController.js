@@ -3,8 +3,9 @@
 // Book CRUD + pagination + search/filter
 // ------------------------------------
 
-import Book from "../models/Book.js";
-import Review from "../models/Review.js";
+import Book from "../models/book.js";
+import Review from "../models/review.js";
+import asyncHandler from "express-async-handler";
 
 /**
  * Helper: compute & update book's average rating & review count
@@ -36,6 +37,22 @@ const recomputeBookRating = async (bookId) => {
     });
   }
 };
+
+/**
+ * @route GET /api/books/mine
+ * @desc Get all books added by logged-in user
+ * @access Private
+ */
+export const getMyBooks = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const books = await Book.find({ addedBy: userId }).sort({ createdAt: -1 });
+
+  res.json({
+    success: true,
+    books,
+  });
+});
 
 /**
  * @route POST /api/books
@@ -211,7 +228,7 @@ export const deleteBook = async (req, res, next) => {
 
     // Delete book and its reviews
     await Review.deleteMany({ bookId: book._id });
-    await book.remove();
+    await book.deleteOne();
 
     res.json({ success: true, message: "Book and its reviews deleted" });
   } catch (err) {

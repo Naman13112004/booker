@@ -3,8 +3,9 @@
 // Review create/edit/delete + update book ratings
 // ------------------------------------
 
-import Review from "../models/Review.js";
-import Book from "../models/Book.js";
+import Review from "../models/review.js";
+import Book from "../models/book.js";
+import asyncHandler from "express-async-handler";
 
 /**
  * Recompute average rating & count for a book
@@ -34,6 +35,49 @@ const recomputeBookRating = async (bookId) => {
     });
   }
 };
+
+/**
+ * @route GET /api/reviews/mine
+ * @desc Get all reviews written by logged-in user
+ * @access Private
+ */
+export const getMyReviews = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const reviews = await Review.find({ userId })
+    .populate("bookId", "title author")
+    .sort({ createdAt: -1 });
+
+  res.json({
+    success: true,
+    reviews,
+  });
+});
+
+/**
+ * @route GET /api/reviews/:bookId
+ * @desc Get all reviews for a specific book
+ * @access Public
+ */
+export const getReviewsByBook = asyncHandler(async (req, res) => {
+  const { bookId } = req.params;
+
+  const book = await Book.findById(bookId);
+  if (!book) {
+    res.status(404);
+    throw new Error("Book not found");
+  }
+
+  const reviews = await Review.find({ bookId })
+    .populate("userId", "name")
+    .sort({ createdAt: -1 }); // latest first
+
+  res.json({
+    success: true,
+    bookId,
+    reviews,
+  });
+});
 
 /**
  * @route POST /api/reviews/:bookId
@@ -140,7 +184,7 @@ export const deleteReview = async (req, res, next) => {
     }
 
     const bookId = review.bookId;
-    await review.remove();
+    await review.deleteOne();
 
     // Recompute rating for related book
     await recomputeBookRating(bookId);

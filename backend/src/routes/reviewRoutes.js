@@ -4,11 +4,14 @@
 // ------------------------------------
 
 import express from "express";
-import { addReview, editReview, deleteReview } from "../controllers/reviewController.js";
+import { addReview, editReview, deleteReview, getReviewsByBook, getMyReviews } from "../controllers/reviewController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { validateAddReview, validateEditReview } from "../validators/reviewValidator.js";
 
 const router = express.Router();
+
+// GET /api/reviews/mine - get reviews by logged-in user
+router.get("/mine", authMiddleware, getMyReviews);
 
 // POST /api/reviews/:bookId - add new review for a book
 router.post("/:bookId", authMiddleware, validateAddReview, addReview);
@@ -18,5 +21,8 @@ router.patch("/:id", authMiddleware, validateEditReview, editReview);
 
 // DELETE /api/reviews/:id - delete a review
 router.delete("/:id", authMiddleware, deleteReview);
+
+// GET /api/reviews/:id - get all reviews for a book
+router.get("/:bookId", getReviewsByBook);
 
 export default router;

@@ -17,9 +17,9 @@ const BookList = () => {
 
   useEffect(() => {
     const fetchBooks = async () => {
-      const res = await api.get(`/books?page=${page}&limit=5`);
-      setBooks(res.data.books);
-      setTotalPages(res.data.totalPages);
+      const res = await api.get(`/books?page=${page}`);
+      setBooks(res.data?.books || []);
+      setTotalPages(res.data?.totalPages || 1);
     };
     fetchBooks();
   }, [page]);
@@ -28,13 +28,17 @@ const BookList = () => {
     <div className="max-w-4xl mx-auto mt-8">
       <h2 className="text-2xl font-bold mb-4">Books</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {books.map((book) => (
-          <BookCard
-            key={book._id}
-            book={book}
-            onSelect={(id) => navigate(`/books/${id}`)}
-          />
-        ))}
+        {books && books.length > 0 ? (
+          books.map((book) => (
+            <BookCard
+              key={book._id}
+              book={book}
+              onSelect={(id) => navigate(`/books/${id}`)}
+            />
+          ))  
+        ) : (
+          <p>No books found...</p>
+        )} 
       </div>
       <Pagination
         currentPage={page}

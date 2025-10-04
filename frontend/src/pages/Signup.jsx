@@ -52,7 +52,7 @@ const Signup = () => {
           className="w-full p-2 border rounded"
           required
         />
-        <button className="bg-blue-600 text-white px-4 py-2 rounded w-full">
+        <button className="bg-blue-600 text-white px-4 py-2 rounded w-full cursor-pointer">
           Register
         </button>
       </form>

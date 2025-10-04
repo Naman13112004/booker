@@ -8,6 +8,13 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 
+import errorHandler from "./middlewares/errorHandler.js";
+
+// Import routes
+import authRoutes from "./routes/authRoutes.js";
+import bookRoutes from "./routes/bookRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+
 const app = express();
 
 // ---------------------------
@@ -35,9 +42,10 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to Booker API 📚" });
 });
 
-// In future: app.use("/api/users", userRoutes);
-// In future: app.use("/api/books", bookRoutes);
-// In future: app.use("/api/reviews", reviewRoutes);
+// API Routes 
+app.use("/api/auth", authRoutes);     // Signup, Login
+app.use("/api/books", bookRoutes);    // CRUD on books
+app.use("/api/reviews", reviewRoutes); // CRUD on reviews
 
 // ---------------------------
 // Error Handler (last middleware)

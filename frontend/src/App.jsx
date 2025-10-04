@@ -34,6 +34,7 @@ function App() {
               <Route path="/" element={<BookList />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/books" element={<BookList />} />
               <Route path="/books/:id" element={<BookDetails />} />
 
               {/* Protected Routes */}

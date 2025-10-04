@@ -12,18 +12,29 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);  // user object
   const [loading, setLoading] = useState(true); // while checking auth
 
+  // Setup token in axios headers if available
+  const setAuthToken = (token) => {
+    if (token) {
+      axiosClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete axiosClient.defaults.headers.common["Authorization"];
+    }
+  };
+
   // Check if user already logged in (token exists)
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      // Fetch user profile from backend
-      axiosClient.get("/users/profile")
+      setAuthToken(token);
+      axiosClient
+        .get("/auth/profile")
         .then((res) => {
           setUser(res.data.user);
         })
         .catch(() => {
           localStorage.removeItem("token");
           setUser(null);
+          setAuthToken(null);
         })
         .finally(() => setLoading(false));
     } else {
@@ -32,23 +43,32 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login function
-  const login = async (email, password) => {
+  const login = async ({ email, password }) => {
     const res = await axiosClient.post("/auth/login", { email, password });
-    localStorage.setItem("token", res.data.token);
-    setUser(res.data.user);
+
+    const { token, ...userData } = res.data.data;
+
+    localStorage.setItem("token", token);
+    setAuthToken(token);
+    setUser(userData);
   };
 
   // Register function
-  const register = async (name, email, password) => {
-    const res = await axiosClient.post("/auth/register", { name, email, password });
-    localStorage.setItem("token", res.data.token);
-    setUser(res.data.user);
+  const register = async ({ name, email, password }) => {
+    const res = await axiosClient.post("/auth/signup", { name, email, password });
+
+    const { token, ...userData } = res.data.data;
+
+    localStorage.setItem("token", token);
+    setAuthToken(token);
+    setUser(userData);
   };
 
   // Logout function
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
+    setAuthToken(null);
   };
 
   return (

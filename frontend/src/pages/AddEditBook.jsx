@@ -34,7 +34,7 @@ const AddEditBook = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (id) {
-      await api.put(`/books/${id}`, form);
+      await api.patch(`/books/${id}`, form);
     } else {
       await api.post("/books", form);
     }

@@ -4,8 +4,11 @@
 // ------------------------------------
 
 import bcrypt from "bcryptjs";
-import User from "../models/User.js";
+import User from "../models/user.js";
+import Book from "../models/book.js";
+import Review from "../models/review.js"
 import generateToken from "../utils/generateToken.js";
+import asyncHandler from "express-async-handler";
 
 /**
  * @route POST /api/auth/signup
@@ -87,3 +90,35 @@ export const login = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * @route   GET /api/auth/profile
+ * @desc    Get user profile (books + reviews) 
+ * @access  Private
+ */
+export const getUserProfile = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  // Fetch user (excluding password)
+  const user = await User.findById(userId).select("-password");
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  // Fetch books added by user
+  const books = await Book.find({ addedBy: userId }).select("title author genre year averageRating");
+
+  // Fetch reviews by user (populate book title)
+  const reviews = await Review.find({ userId })
+    .populate("bookId", "title author")
+    .select("rating reviewText createdAt");
+
+  res.json({
+    success: true,
+    user,
+    books,
+    reviews,
+  });
+});
