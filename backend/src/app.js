@@ -41,12 +41,12 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cache-Control"],
   })
 );
 
 // Handle preflight OPTIONS requests
-app.options("*", cors());
+app.options("/", cors());
 
 // Secure HTTP headers (basic security)
 app.use(helmet());
