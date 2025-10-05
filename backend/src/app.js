@@ -25,7 +25,28 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS (so frontend can talk to backend)
-app.use(cors());
+const allowedOrigins = [
+  "https://booker-beige.vercel.app",
+  "http://localhost:5173",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Handle preflight OPTIONS requests
+app.options("*", cors());
 
 // Secure HTTP headers (basic security)
 app.use(helmet());
