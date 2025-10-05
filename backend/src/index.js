@@ -18,5 +18,5 @@ connectDB();
 
 // Start the server only after DB connection is successful
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on https://booker-p26c.onrender.com/`);
 });
