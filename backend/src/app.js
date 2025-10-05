@@ -46,7 +46,7 @@ app.use(
 );
 
 // Handle preflight OPTIONS requests
-app.options("/", cors());
+app.options("*", cors());
 
 // Secure HTTP headers (basic security)
 app.use(helmet());
