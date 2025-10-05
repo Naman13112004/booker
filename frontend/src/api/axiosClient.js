@@ -7,7 +7,7 @@ import axios from "axios";
 
 // Create Axios instance
 const axiosClient = axios.create({
-  baseURL: "https://booker-p26c.onrender.com/", // backend base URL
+  baseURL: "https://booker-p26c.onrender.com/api", // backend base URL
   headers: {
     "Content-Type": "application/json",
   },
