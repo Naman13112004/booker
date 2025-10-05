@@ -94,7 +94,7 @@ const BookDetails = () => {
             className="w-full p-2 border rounded"
           >
             {[1, 2, 3, 4, 5].map((r) => (
-              <option key={r} value={r}>
+              <option key={r} value={r} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" >
                 {r} Star{r > 1 && "s"}
               </option>
             ))}
